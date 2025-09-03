@@ -21,20 +21,17 @@ import {
 interface ComboboxProps {
   value: string;
   onChange: (value: string) => void;
+  categories?: string[]; // Add categories prop
 }
 
-const productCategories = [
-  { value: "-", label: "None" },
-  { value: "code", label: "Code Projects" },
-  { value: "courses", label: "Mini-Courses" },
-  { value: "guides", label: "PDF Guides" },
-  { value: "templates", label: "Productivity Templates" },
-  { value: "snippets", label: "Reference Snippets" },
-];
-
-
-export function Combobox({ value, onChange }: ComboboxProps) {
+export function Combobox({ value, onChange, categories = [] }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
+
+  // Create categories list with "All" option
+  const categoryOptions = [
+    { value: "", label: "All Categories" },
+    ...categories.map(cat => ({ value: cat, label: cat }))
+  ];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -45,7 +42,7 @@ export function Combobox({ value, onChange }: ComboboxProps) {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value ? value : "Select category..."}
+          {value ? categoryOptions.find(cat => cat.value === value)?.label : "Select category..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -55,7 +52,7 @@ export function Combobox({ value, onChange }: ComboboxProps) {
           <CommandList>
             <CommandEmpty>No category found.</CommandEmpty>
             <CommandGroup>
-              {productCategories.map((cat) => (
+              {categoryOptions.map((cat) => (
                 <CommandItem
                   key={cat.value}
                   value={cat.value}

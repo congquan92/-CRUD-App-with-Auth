@@ -71,11 +71,19 @@ export async function createPlant(plantData: {
       throw new Error("User not authenticated");
     }
 
+    // Trim all string fields to remove whitespace
+    const cleanedData = {
+      name: plantData.name.trim(),
+      description: plantData.description?.trim() || undefined,
+      category: plantData.category.trim(),
+      price: plantData.price,
+      stock: plantData.stock,
+      imgURL: plantData.imgURL?.trim() || undefined,
+      userId: currentUserId,
+    };
+
     const newPlant = await prisma.plant.create({
-      data: {
-        ...plantData,
-        userId: currentUserId,
-      },
+      data: cleanedData,
     });
 
     revalidatePath("/plants"); // refresh plants page
@@ -113,9 +121,25 @@ export async function updatePlant(
       throw new Error("Plant not found or not authorized");
     }
 
+    // Trim all string fields to remove whitespace
+    const cleanedData: Partial<{
+      name: string;
+      description: string | null;
+      category: string;
+      price: number;
+      stock: number;
+      imgURL: string | null;
+    }> = {};
+    if (plantData.name !== undefined) cleanedData.name = plantData.name.trim();
+    if (plantData.description !== undefined) cleanedData.description = plantData.description?.trim() || null;
+    if (plantData.category !== undefined) cleanedData.category = plantData.category.trim();
+    if (plantData.price !== undefined) cleanedData.price = plantData.price;
+    if (plantData.stock !== undefined) cleanedData.stock = plantData.stock;
+    if (plantData.imgURL !== undefined) cleanedData.imgURL = plantData.imgURL?.trim() || null;
+
     const updatedPlant = await prisma.plant.update({
       where: { id: id },
-      data: plantData,
+      data: cleanedData,
     });
 
     revalidatePath("/plants"); // refresh plants page

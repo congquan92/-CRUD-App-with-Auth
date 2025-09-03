@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
 import { Combobox } from "./ui/combox";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "./ui/button";
 import { getPlants, deletePlant } from "@/actions/plant.action";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,13 @@ export default function InventoryTable({ plants }: InventoryTableProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Get unique categories from plants data
+  const availableCategories = useMemo(() => {
+    if (!plants?.userPlants) return [];
+    const categories = plants.userPlants.map(plant => plant.category);
+    return [...new Set(categories)].sort(); // Remove duplicates and sort
+  }, [plants?.userPlants]);
 
   // filter plants by name and category (if selected)
   const filteredPlants = plants?.userPlants?.filter((plant: PlantItem) => {
@@ -106,7 +113,11 @@ export default function InventoryTable({ plants }: InventoryTableProps) {
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
           </div>
-          <Combobox value={selectedCategory} onChange={(value) => setSelectedCategory(value)} />
+          <Combobox 
+            value={selectedCategory} 
+            onChange={(value) => setSelectedCategory(value)}
+            categories={availableCategories}
+          />
         </div>
         <Button onClick={handleAddPlant} variant="default">
           Add Plant
